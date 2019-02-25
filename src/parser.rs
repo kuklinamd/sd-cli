@@ -15,17 +15,35 @@ pub enum Name {
 #[derive(PartialEq, Eq, Debug)]
 pub struct SimpleCommand {
     /// Name of the command.
-    name: ExtendName,
+    name: ExtendedName,
     /// Its arguments.
-    args: Vec<ExtendName>,
+    args: Vec<ExtendedName>,
+}
+impl SimpleCommand {
+    pub fn get_name(&self) -> &ExtendedName {
+        &self.name
+    }
+
+    pub fn get_args(&self) -> &Vec<ExtendedName> {
+        &self.args
+    }
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub struct ExportEnv {
+pub struct ExportedEnv {
     /// Name of a variable.
     name: String,
     /// Its value.
     value: String,
+}
+impl ExportedEnv {
+    pub fn get_name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn get_value(&self) -> &String {
+        &self.value
+    }
 }
 
 #[derive(PartialEq, Eq, Debug)]
@@ -33,7 +51,7 @@ pub enum CommandType {
     /// Execute a simple command (could contain environment variables).
     Simple(SimpleCommand),
     /// Export environment variable.
-    Env(ExportEnv),
+    Env(ExportedEnv),
 }
 
 #[derive(PartialEq, Eq, Debug)]
@@ -49,14 +67,23 @@ pub struct Command {
     /// Next binded command, if exists.
     next: Option<Box<Bind>>,
 }
+impl Command {
+    pub fn get_cmd(&self) -> &CommandType {
+        &self.cmd
+    }
+
+    pub fn get_next(&self) -> &Option<Box<Bind>> {
+        &self.next
+    }
+}
 
 #[derive(PartialEq, Eq, Debug)]
-pub enum ExtendName {
+pub enum ExtendedName {
     /// Simple name: identifier, environment variable or single quoted string.
     Name(Name),
     /// Double quoted string, which could include environment variable,
     /// which we need to replace.
-    Extend(Vec<Name>),
+    Extended(Vec<Name>),
 }
 
 #[derive(Parser)]
@@ -69,23 +96,23 @@ fn translate_rule_envvar(pair: pest::iterators::Pair<Rule>) -> Name {
     Name::EnvVar(name.to_string())
 }
 
-fn translate_rule_envset(pair: pest::iterators::Pair<Rule>) -> ExportEnv {
+fn translate_rule_envset(pair: pest::iterators::Pair<Rule>) -> ExportedEnv {
     let mut pairs = pair.into_inner();
 
     let name = pairs.next().unwrap().as_str();
     let val = pairs.next().unwrap().as_str();
 
-    ExportEnv {
+    ExportedEnv {
         name: name.to_string(),
         value: val.to_string(),
     }
 }
 
-fn translate_rule_squote(pair: pest::iterators::Pair<Rule>) -> ExtendName {
-    ExtendName::Name(Name::Plain(pair.as_str().to_string()))
+fn translate_rule_squote(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
+    ExtendedName::Name(Name::Plain(pair.as_str().to_string()))
 }
 
-fn translate_rule_dquote(pair: pest::iterators::Pair<Rule>) -> ExtendName {
+fn translate_rule_dquote(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
     let pairs = pair.into_inner();
     let mut extend = Vec::new();
     for inner_pair in pairs {
@@ -102,15 +129,15 @@ fn translate_rule_dquote(pair: pest::iterators::Pair<Rule>) -> ExtendName {
         };
         extend.push(a);
     }
-    ExtendName::Extend(extend)
+    ExtendedName::Extended(extend)
 }
 
-fn translate_rule_name(pair: pest::iterators::Pair<Rule>) -> ExtendName {
+fn translate_rule_name(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
     let mut pairs = pair.into_inner();
     let inner_pair = pairs.next().unwrap();
     match inner_pair.as_rule() {
-        Rule::ident => ExtendName::Name(Name::Plain(inner_pair.as_str().to_string())),
-        Rule::envvar => ExtendName::Name(translate_rule_envvar(inner_pair)),
+        Rule::ident => ExtendedName::Name(Name::Plain(inner_pair.as_str().to_string())),
+        Rule::envvar => ExtendedName::Name(translate_rule_envvar(inner_pair)),
         Rule::ident_inside_dq => translate_rule_dquote(inner_pair),
         Rule::ident_inside_sq => translate_rule_squote(inner_pair),
         x => {
@@ -123,7 +150,7 @@ fn translate_rule_name(pair: pest::iterators::Pair<Rule>) -> ExtendName {
     }
 }
 
-fn translate_rule_option(pair: pest::iterators::Pair<Rule>) -> ExtendName {
+fn translate_rule_option(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
     let pairs = pair.into_inner().next().unwrap();
     translate_rule_name(pairs)
 }
@@ -183,7 +210,7 @@ fn translate_rule_cmd(pair: pest::iterators::Pair<Rule>) -> Command {
 }
 
 /// Parse string command into inner representation of a command structure.
-fn parse_cmd(cmd: String) -> Option<Command> {
+pub fn parse_cmd(cmd: String) -> Option<Command> {
     match IdentParser::parse(Rule::cmd, cmd.as_str()) {
         Ok(mut pairs) => Some(translate_rule_cmd(pairs.next().unwrap())),
         _ => None,
@@ -195,7 +222,7 @@ fn parse_cmd(cmd: String) -> Option<Command> {
 mod test_parser {
     use super::*;
 
-    use super::ExtendName::*;
+    use super::ExtendedName::*;
     use super::Name::*;
 
     #[test]
@@ -243,7 +270,7 @@ mod test_parser {
         let dcmd = Command {
             cmd: CommandType::Simple(SimpleCommand {
                 name: Name(Plain("echo".to_string())),
-                args: vec![Extend(vec![EnvVar("var".to_string())])],
+                args: vec![Extended(vec![EnvVar("var".to_string())])],
             }),
             next: None,
         };
@@ -254,7 +281,7 @@ mod test_parser {
     fn test_env() {
         let tcmd = parse_cmd("var=10".to_string()).unwrap();
         let dcmd = Command {
-            cmd: CommandType::Env(ExportEnv {
+            cmd: CommandType::Env(ExportedEnv {
                 name: "var".to_string(),
                 value: "10".to_string(),
             }),
