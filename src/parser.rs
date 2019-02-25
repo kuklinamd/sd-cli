@@ -16,7 +16,7 @@ pub enum Name {
 pub struct SimpleCommand {
     /// Name of the command.
     name: ExtendedName,
-    /// Its arguments.
+    /// Commands' arguments.
     args: Vec<ExtendedName>,
 }
 impl SimpleCommand {
@@ -31,9 +31,9 @@ impl SimpleCommand {
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct ExportedEnv {
-    /// Name of a variable.
+    /// Name of the variable.
     name: String,
-    /// Its value.
+    /// Value of the variable.
     value: String,
 }
 impl ExportedEnv {
@@ -62,7 +62,7 @@ pub enum Bind {
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct Command {
-    /// Command itself.
+    /// Not binded command.
     cmd: CommandType,
     /// Next binded command, if exists.
     next: Option<Box<Bind>>,
@@ -210,6 +210,10 @@ fn translate_rule_cmd(pair: pest::iterators::Pair<Rule>) -> Command {
 }
 
 /// Parse string command into inner representation of a command structure.
+///
+/// TODO: We consider that `unwrap()` is save if `parse` returns
+/// `Ok(_)`, because if parsing failes `Err()` returns.
+///
 pub fn parse_cmd(cmd: String) -> Option<Command> {
     match IdentParser::parse(Rule::cmd, cmd.as_str()) {
         Ok(mut pairs) => Some(translate_rule_cmd(pairs.next().unwrap())),
