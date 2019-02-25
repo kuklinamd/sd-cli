@@ -17,7 +17,9 @@ pub fn execute_external(name: &String, args: &Vec<String>, msg: Option<String>) 
             // Is `msg` isn't None, we want to send its content
             // to stdin of the executed command.
             if let Some(ref mut sin) = (&mut cmd).stdin {
-                sin.write_all(m.as_bytes());
+                if let Err(_) = sin.write_all(m.as_bytes()) {
+                    eprintln!("Failed to write to stdin.");
+                }
             }
         }
 
