@@ -1,5 +1,5 @@
-use std::io::{Read, Write};
-use std::process::{Command, Stdio,ChildStdin, ChildStdout};
+use std::io::{Write};
+use std::process::{Command, Stdio};
 
 /// Execute system command with given `name`. Passes `args` as command-line
 /// arguments and sends `msg` as input, if the command is the part of pipeline.
