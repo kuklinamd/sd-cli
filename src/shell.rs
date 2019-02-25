@@ -55,7 +55,7 @@ impl Shell {
 
     fn handle(&mut self, l: String) {
         if let Some(parsed) = parser::parse_cmd(l) {
-            /// Parsed AST -> Command AST
+            // Parsed AST -> Command AST
             let cmd = self.transform(&parsed);
             cmd.execute(self);
         } else {
