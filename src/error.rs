@@ -16,6 +16,7 @@ pub enum IOErr {
     Open
 }
 
+/// Print errors.
 pub fn eprint(err: ShellError) {
     match err {
         ShellError::IOError(io) => eprintio(io),
