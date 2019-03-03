@@ -14,6 +14,29 @@ pub enum ShellResult<T> {
     Err(ShellError)
 }
 
+impl <T> ShellResult<T> {
+    pub fn is_ok(&self) -> bool {
+        match self {
+            ShellResult::Ok(_) => true,
+            _     => false
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        match self {
+            ShellResult::Empty => true,
+            _     => false
+        }
+    }
+
+    pub fn is_err(&self) -> bool {
+        match self {
+            ShellResult::Err(_) => true,
+            _      => false
+        }
+    }
+}
+
 pub struct Shell {
     /// Shell's current local environment variables.
     local_env: Env,
