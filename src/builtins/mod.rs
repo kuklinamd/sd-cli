@@ -16,12 +16,13 @@ impl Builtins {
     }
 
     pub fn init() -> Builtins {
+        // Create list of builtin commands.
         let mut b = Builtins::new();
         b.add("echo", Builtin(Box::new(builtins::echo::echo)));
         b.add("wc",   Builtin(Box::new(builtins::wc::wc)));
         b.add("pwd",  Builtin(Box::new(builtins::pwd::pwd)));
         b.add("exit", Builtin(Box::new(builtins::exit::exit)));
-        b.add("cat", Builtin(Box::new(builtins::cat::cat)));
+        b.add("cat",  Builtin(Box::new(builtins::cat::cat)));
         b
     }
 
@@ -35,6 +36,11 @@ impl Builtins {
 }
 
 /// Pointer to builtin function.
+///
+/// `builtin` takes:
+///  * `&Vec<String>` -- command line arguments.
+///  * Option<String> -- input to stdin.
+///
 pub struct Builtin(Box<Fn(&Vec<String>, Option<String>) -> Option<String>>);
 impl Builtin {
     pub fn new(callback: Box<Fn(&Vec<String>, Option<String>) -> Option<String>>) -> Builtin {
