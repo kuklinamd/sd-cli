@@ -3,6 +3,7 @@ pub mod echo;
 pub mod pwd;
 pub mod exit;
 pub mod cat;
+pub mod grep;
 
 mod common;
 
@@ -28,6 +29,7 @@ impl Builtins {
         b.add("pwd",  Builtin(Box::new(builtins::pwd::pwd)));
         b.add("exit", Builtin(Box::new(builtins::exit::exit)));
         b.add("cat",  Builtin(Box::new(builtins::cat::cat)));
+        b.add("grep",  Builtin(Box::new(builtins::grep::grep)));
         b
     }
 
