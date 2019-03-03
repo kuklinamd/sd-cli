@@ -6,6 +6,7 @@ use super::parser;
 use super::commands::ast_transform;
 use super::builtins::Builtins;
 use super::process;
+use super::error::ShellError;
 
 pub struct Shell {
     /// Shell's current local environment variables.
@@ -40,7 +41,7 @@ impl Shell {
     }
 
     /// Execute command in shell's context.
-    pub fn exec(&self, name: &String, args: &Vec<String>, msg: Option<String>) -> Option<String> {
+    pub fn exec(&self, name: &String, args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
         if let Some(callback) = self.builtins.get(&name) {
             return callback.exec(args, msg)
         }

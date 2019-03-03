@@ -1,28 +1,19 @@
-use std::io::{Read, BufReader};
-use std::fs::File;
+use super::common::get_content;
+use crate::error::ShellError;
 
-pub fn wc(args: &Vec<String>, msg: Option<String>) -> Option<String> {
+pub fn wc(args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
     if args.len() != 0 {
-        if let Ok(file) = File::open(&args[0]) {
-            let mut buf  = BufReader::new(file);
-            let mut content = String::new();
-            if let Ok(_) = buf.read_to_string(&mut content) {
-                return Some(wc_inner(&content));
-            } else {
-                eprintln!("Couldn't read a file!");
-            }
+        let res = get_content(&args[0]);
+        if let Ok(content) = res {
+            return Ok(wc_inner(&content));
         } else {
-            eprintln!("Couldn't open a file!");
-        }
-    } else {
-        if let Some(s) = msg {
-            return Some(wc_inner(&s));
-        } else {
-            eprintln!("No file or stream.");
+            return res;
         }
     }
-
-    None
+    if let Some(s) = msg {
+        return Ok(wc_inner(&s));
+    }
+    Err(ShellError::Error("No input file or stream."))
 }
 
 fn wc_inner(content: &String) -> String {

@@ -1,6 +1,8 @@
 use std::ops::Deref;
 
 use super::shell::Shell;
+use crate::error;
+use crate::error::ShellError;
 
 /// Builtin or system command.
 #[derive(PartialEq, Eq, Debug)]
@@ -51,7 +53,7 @@ impl Command {
         let stdio = match self.cmd {
             CommandType::Env(ref e) => {
                 Command::export(&e, shell);
-                None
+                Ok("".to_string())
             },
             CommandType::Simple(ref c) => Command::exec(&c, shell, msg)
         };
@@ -59,10 +61,18 @@ impl Command {
         if let Some(ref bind) = self.next {
             // Well, now we have only one Bind pattern.
             let Bind::Pipe(c) = (*bind).deref();
-            c.execute_rec(shell, stdio);
+
+            if let Ok(s) = stdio {
+                c.execute_rec(shell, Some(s));
+            } else {
+                error::eprint(stdio.err().unwrap());
+                c.execute_rec(shell, None);
+            }
         } else {
-            if let Some(s) = stdio {
+            if let Ok(s) = stdio {
                 println!("{}", s);
+            } else {
+                error::eprint(stdio.err().unwrap());
             }
         }
     }
@@ -73,7 +83,7 @@ impl Command {
     }
 
     // Execute command inside shell's environment.
-    fn exec(cmd: &SimpleCommand, shell: &Shell, msg: Option<String>) -> Option<String> {
+    fn exec(cmd: &SimpleCommand, shell: &Shell, msg: Option<String>) -> Result<String, ShellError> {
         shell.exec(&cmd.name, &cmd.args, msg)
     }
 }

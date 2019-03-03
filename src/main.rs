@@ -4,6 +4,7 @@ pub mod environment;
 pub mod shell;
 pub mod builtins;
 pub mod process;
+pub mod error;
 
 use shell::Shell;
 use environment::Env;

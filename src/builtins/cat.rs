@@ -1,22 +1,12 @@
-use std::io::{Read, BufReader};
-use std::fs::File;
+use super::common::get_content;
+use crate::error::ShellError;
 
-pub fn cat(args: &Vec<String>, msg: Option<String>) -> Option<String> {
+pub fn cat(args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
     if args.len() != 0 {
-        if let Ok(file) = File::open(&args[0]) {
-            let mut buf  = BufReader::new(file);
-            let mut content = String::new();
-            if let Ok(_) = buf.read_to_string(&mut content) {
-                return Some(content);
-            } else {
-                eprintln!("Couldn't read a file!");
-            }
-        } else {
-            eprintln!("Couldn't open a file!");
-        }
-    } else {
-        return msg;
+        return get_content(&args[0]);
     }
-
-    None
+    if let Some(content) = msg {
+        return Ok(content);
+    }
+    Err(ShellError::Error("No input file or stream"))
 }

@@ -4,9 +4,13 @@ pub mod pwd;
 pub mod exit;
 pub mod cat;
 
+mod common;
+
 use std::collections::HashMap;
 
 use crate::builtins;
+
+use super::error::ShellError;
 
 /// Dictionary of builtin functions.
 pub struct Builtins(HashMap<String, Builtin>);
@@ -41,13 +45,13 @@ impl Builtins {
 ///  * `&Vec<String>` -- command line arguments.
 ///  * Option<String> -- input to stdin.
 ///
-pub struct Builtin(Box<Fn(&Vec<String>, Option<String>) -> Option<String>>);
+pub struct Builtin(Box<Fn(&Vec<String>, Option<String>) -> Result<String, ShellError>>);
 impl Builtin {
-    pub fn new(callback: Box<Fn(&Vec<String>, Option<String>) -> Option<String>>) -> Builtin {
+    pub fn new(callback: Box<Fn(&Vec<String>, Option<String>) -> Result<String, ShellError>>) -> Builtin {
         Builtin(callback)
     }
 
-    pub fn exec(&self, args: &Vec<String>, msg: Option<String>) -> Option<String> {
+    pub fn exec(&self, args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
         (*self.0)(args, msg)
     }
 }
