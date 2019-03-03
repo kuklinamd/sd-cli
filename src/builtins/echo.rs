@@ -1,4 +1,5 @@
 use crate::error::ShellError;
-pub fn echo(args: &Vec<String>, _msg: Option<String>) -> Result<String, ShellError> {
-    Ok(args.join(" "))
+use crate::shell::ShellResult;
+pub fn echo(args: &Vec<String>, _msg: Option<String>) -> ShellResult<String> {
+    ShellResult::Ok(args.join(" "))
 }

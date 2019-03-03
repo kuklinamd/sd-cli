@@ -1,19 +1,20 @@
 use super::common::get_content;
 use crate::error::ShellError;
+use crate::shell::ShellResult;
 
-pub fn wc(args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
+pub fn wc(args: &Vec<String>, msg: Option<String>) -> ShellResult<String> {
     if args.len() != 0 {
         let res = get_content(&args[0]);
-        if let Ok(content) = res {
-            return Ok(wc_inner(&content));
+        if let ShellResult::Ok(content) = res {
+            return ShellResult::Ok(wc_inner(&content));
         } else {
             return res;
         }
     }
     if let Some(s) = msg {
-        return Ok(wc_inner(&s));
+        return ShellResult::Ok(wc_inner(&s));
     }
-    Err(ShellError::Error("No input file or stream."))
+    ShellResult::Err(ShellError::Error("No input file or stream."))
 }
 
 fn wc_inner(content: &String) -> String {

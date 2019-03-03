@@ -8,6 +8,12 @@ use super::builtins::Builtins;
 use super::process;
 use super::error::ShellError;
 
+pub enum ShellResult<T> {
+    Ok(T),
+    Empty,
+    Err(ShellError)
+}
+
 pub struct Shell {
     /// Shell's current local environment variables.
     local_env: Env,
@@ -41,7 +47,7 @@ impl Shell {
     }
 
     /// Execute command in shell's context.
-    pub fn exec(&self, name: &String, args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
+    pub fn exec(&self, name: &String, args: &Vec<String>, msg: Option<String>) -> ShellResult<String> {
         if let Some(callback) = self.builtins.get(&name) {
             return callback.exec(args, msg)
         }

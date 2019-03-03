@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use crate::builtins;
 
 use super::error::ShellError;
+use super::shell::ShellResult;
 
 /// Dictionary of builtin functions.
 pub struct Builtins(HashMap<String, Builtin>);
@@ -45,13 +46,13 @@ impl Builtins {
 ///  * `&Vec<String>` -- command line arguments.
 ///  * Option<String> -- input to stdin.
 ///
-pub struct Builtin(Box<Fn(&Vec<String>, Option<String>) -> Result<String, ShellError>>);
+pub struct Builtin(Box<Fn(&Vec<String>, Option<String>) -> ShellResult<String>>);
 impl Builtin {
-    pub fn new(callback: Box<Fn(&Vec<String>, Option<String>) -> Result<String, ShellError>>) -> Builtin {
+    pub fn new(callback: Box<Fn(&Vec<String>, Option<String>) -> ShellResult<String>>) -> Builtin {
         Builtin(callback)
     }
 
-    pub fn exec(&self, args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
+    pub fn exec(&self, args: &Vec<String>, msg: Option<String>) -> ShellResult<String> {
         (*self.0)(args, msg)
     }
 }

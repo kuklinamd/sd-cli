@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use super::shell::Shell;
+use super::shell::{Shell,ShellResult};
 use crate::error;
 use crate::error::ShellError;
 
@@ -51,39 +51,38 @@ impl Command {
     // Recursively traverse command's AST and execute commands at nodes.
     fn execute_rec(&self, shell: &mut Shell, msg: Option<String>) {
         let stdio = match self.cmd {
-            CommandType::Env(ref e) => {
-                Command::export(&e, shell);
-                Ok("".to_string())
-            },
+            CommandType::Env(ref e) => Command::export(&e, shell),
             CommandType::Simple(ref c) => Command::exec(&c, shell, msg)
         };
 
         if let Some(ref bind) = self.next {
             // Well, now we have only one Bind pattern.
             let Bind::Pipe(c) = (*bind).deref();
-
-            if let Ok(s) = stdio {
-                c.execute_rec(shell, Some(s));
-            } else {
-                error::eprint(stdio.err().unwrap());
-                c.execute_rec(shell, None);
-            }
+            match stdio {
+                ShellResult::Ok(s) => c.execute_rec(shell, Some(s)),
+                ShellResult::Empty => c.execute_rec(shell, None),
+                ShellResult::Err(e) => {
+                    error::eprint(e);
+                    c.execute_rec(shell, None)
+                }
+            };
         } else {
-            if let Ok(s) = stdio {
-                println!("{}", s);
-            } else {
-                error::eprint(stdio.err().unwrap());
-            }
+            match stdio {
+                ShellResult::Ok(s)  => println!("{}", s),
+                ShellResult::Err(e) => error::eprint(e),
+                ShellResult::Empty  => ()
+            };
         }
     }
 
     // Export variable inside shell's evironment.
-    fn export(env: &ExportedEnv, shell: &mut Shell) {
+    fn export(env: &ExportedEnv, shell: &mut Shell) -> ShellResult<String> {
         shell.export(env.name.clone(), env.value.clone());
+        ShellResult::Empty
     }
 
     // Execute command inside shell's environment.
-    fn exec(cmd: &SimpleCommand, shell: &Shell, msg: Option<String>) -> Result<String, ShellError> {
+    fn exec(cmd: &SimpleCommand, shell: &Shell, msg: Option<String>) -> ShellResult<String> {
         shell.exec(&cmd.name, &cmd.args, msg)
     }
 }

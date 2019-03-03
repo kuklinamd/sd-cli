@@ -1,9 +1,10 @@
 use std::env;
 use crate::error::ShellError;
+use crate::shell::ShellResult;
 
-pub fn pwd(_args: &Vec<String>, _msg: Option<String>) -> Result<String, ShellError> {
+pub fn pwd(_args: &Vec<String>, _msg: Option<String>) -> ShellResult<String> {
     if let Ok(path) = env::current_dir() {
-       return Ok(path.display().to_string());
+       return ShellResult::Ok(path.display().to_string());
     }
-    Err(ShellError::Error("Unable to get current directory"))
+    ShellResult::Err(ShellError::Error("Unable to get current directory"))
 }

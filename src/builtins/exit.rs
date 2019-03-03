@@ -1,5 +1,7 @@
 use std::process;
 use crate::error::ShellError;
-pub fn exit(_args: &Vec<String>, _msg: Option<String>) -> Result<String, ShellError> {
+use crate::shell::ShellResult;
+
+pub fn exit(_args: &Vec<String>, _msg: Option<String>) -> ShellResult<String> {
     process::exit(0);
 }

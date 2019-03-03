@@ -2,12 +2,13 @@ use std::io::{Write};
 use std::process::{Command, Stdio};
 
 use super::error::{ShellError,IOErr};
+use super::shell::ShellResult;
 
 /// Execute system command with given `name`. Passes `args` as command-line
 /// arguments and sends `msg` as input, if the command is the part of pipeline.
 ///
 /// *Returns* result if is exists.
-pub fn execute_external(name: &String, args: &Vec<String>, msg: Option<String>) -> Result<String, ShellError> {
+pub fn execute_external(name: &String, args: &Vec<String>, msg: Option<String>) -> ShellResult<String> {
     let cmd = Command::new(name)
               .args(args)
               .stdin(Stdio::piped())
@@ -20,7 +21,7 @@ pub fn execute_external(name: &String, args: &Vec<String>, msg: Option<String>) 
             // to stdin of the executed command.
             if let Some(ref mut sin) = (&mut cmd).stdin {
                 if let Err(_) = sin.write_all(m.as_bytes()) {
-                    return Err(ShellError::Error("Unable to write to the process stdin."));
+                    return ShellResult::Err(ShellError::Error("Unable to write to the process stdin."));
                 }
             }
         }
@@ -29,10 +30,10 @@ pub fn execute_external(name: &String, args: &Vec<String>, msg: Option<String>) 
         // pipeline or to stdout.
         if let Ok(out) = cmd.wait_with_output() {
             if let Ok(s) = String::from_utf8(out.stdout) {
-                return Ok(s);
+                return ShellResult::Ok(s);
             }
-            return Err(ShellError::IOError(IOErr::Read));
+            return ShellResult::Err(ShellError::IOError(IOErr::Read));
         }
     }
-    Err(ShellError::IOError(IOErr::Exec))
+    ShellResult::Err(ShellError::IOError(IOErr::Exec))
 }
