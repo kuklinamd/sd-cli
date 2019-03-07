@@ -10,7 +10,6 @@ use std::collections::HashMap;
 
 use crate::builtins;
 
-use super::error::ShellError;
 use super::shell::ShellResult;
 
 /// Dictionary of builtin functions.
