@@ -9,8 +9,11 @@ use super::process;
 use super::error::ShellError;
 
 pub enum ShellResult<T> {
+    /// Result of the command execution is something from stdout.
     Ok(T),
+    /// There's no result from stdout.
     Empty,
+    /// On error returns error description.
     Err(ShellError)
 }
 
