@@ -3,6 +3,8 @@ pub mod echo;
 pub mod pwd;
 pub mod exit;
 pub mod cat;
+pub mod cd;
+pub mod ls;
 
 mod common;
 
@@ -22,6 +24,8 @@ impl Builtins {
     pub fn init() -> Builtins {
         // Create list of builtin commands.
         let mut b = Builtins::new();
+        b.add("ls",   Builtin(Box::new(builtins::ls::ls)));
+        b.add("cd",   Builtin(Box::new(builtins::cd::cd)));
         b.add("echo", Builtin(Box::new(builtins::echo::echo)));
         b.add("wc",   Builtin(Box::new(builtins::wc::wc)));
         b.add("pwd",  Builtin(Box::new(builtins::pwd::pwd)));
