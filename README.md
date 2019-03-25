@@ -36,3 +36,8 @@ Software Design. HW 1: CLI
 Команда `cargo build` соберёт проект.
 
 Команда `cargo run` запустит проект.
+
+Диаграмма
+---------
+
+![alt text](./class_diagram/cd.png)
