@@ -1,4 +1,4 @@
-cmd = { (envset | single_cmd) ~ SPACE_SEPARATOR* ~ ("|" ~ SPACE_SEPARATOR* ~ cmd)* ~ EOI }
+cmd = { SPACE_SEPARATOR* ~ (envset | single_cmd) ~ SPACE_SEPARATOR* ~ ("|" ~ SPACE_SEPARATOR* ~ cmd)* ~ EOI }
 
 single_cmd = {
  (name ~ (SPACE_SEPARATOR* ~ option)*)
@@ -36,7 +36,7 @@ envset = { name ~ "=" ~ name }
 option = { name }
 name = {
    ident 
- | envvar 
+ | (envvar+)
  | "\'" ~ ident_inside_sq ~ "\'"
  | "\"" ~ ident_inside_dq ~ "\""
 }

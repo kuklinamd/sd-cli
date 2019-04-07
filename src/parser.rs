@@ -132,12 +132,33 @@ fn translate_rule_dquote(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
     ExtendedName::Extended(extend)
 }
 
+fn translate_rule_envvars(envs: Vec<pest::iterators::Pair<Rule>>) -> ExtendedName {
+    //let exname = ExtendedName::Name(translate_rule_envvar(pair));
+    let mut exnames = Vec::new();
+    for env in envs {
+        exnames.push(translate_rule_envvar(env));
+    }
+    ExtendedName::Extended(exnames)
+}
+
 fn translate_rule_name(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
     let mut pairs = pair.into_inner();
     let inner_pair = pairs.next().unwrap();
     match inner_pair.as_rule() {
         Rule::ident => ExtendedName::Name(Name::Plain(inner_pair.as_str().to_string())),
-        Rule::envvar => ExtendedName::Name(translate_rule_envvar(inner_pair)),
+        Rule::envvar => {
+            let mut envs = Vec::new();
+            envs.push(inner_pair);
+            while let Some(peek_pair) = pairs.peek() {
+                if peek_pair.as_rule() == Rule::envvar {
+                    let p = pairs.next().unwrap();
+                    envs.push(p);
+                } else {
+                    break;
+                }
+            }
+            translate_rule_envvars(envs)
+        },
         Rule::ident_inside_dq => translate_rule_dquote(inner_pair),
         Rule::ident_inside_sq => translate_rule_squote(inner_pair),
         x => {
@@ -200,7 +221,7 @@ fn translate_rule_cmd(pair: pest::iterators::Pair<Rule>) -> Command {
     let next_cmd = match next_pair.as_rule() {
         Rule::cmd => Some(Box::new(Bind::Pipe(translate_rule_cmd(next_pair)))),
         Rule::EOI => None,
-        x => panic!("Must not happe: {:?} {}", x, next_pair.as_str()),
+        x => panic!("Must not happen: {:?} {}", x, next_pair.as_str()),
     };
 
     Command {
