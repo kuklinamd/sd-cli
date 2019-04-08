@@ -59,7 +59,6 @@ impl Command {
             let Bind::Pipe(c) = (*bind).deref();
             match stdio {
                 ShellResult::Ok(s) => c.execute_rec(shell, Some(s)),
-                ShellResult::Empty => c.execute_rec(shell, None),
                 ShellResult::Err(e) => {
                     error::eprint(e);
                     c.execute_rec(shell, None)
@@ -69,7 +68,6 @@ impl Command {
             match stdio {
                 ShellResult::Ok(s)  => println!("{}", s),
                 ShellResult::Err(e) => error::eprint(e),
-                ShellResult::Empty  => ()
             };
         }
     }
@@ -77,7 +75,7 @@ impl Command {
     // Export variable inside shell's evironment.
     fn export(env: &ExportedEnv, shell: &mut Shell) -> ShellResult<String> {
         shell.export(env.name.clone(), env.value.clone());
-        ShellResult::Empty
+        ShellResult::Ok("".to_string())
     }
 
     // Execute command inside shell's environment.
