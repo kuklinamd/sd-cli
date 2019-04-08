@@ -1,0 +1,43 @@
+cmd = { SPACE_SEPARATOR* ~ (envset | single_cmd) ~ SPACE_SEPARATOR* ~ ("|" ~ SPACE_SEPARATOR* ~ cmd)* ~ EOI }
+
+single_cmd = {
+ (name ~ (SPACE_SEPARATOR* ~ option)*)
+}
+
+ident_symb = { 
+    LETTER
+  | NUMBER 
+  | ('!' .. '!') 
+  | ('#' .. '#') 
+  | ('%' .. '&') 
+  | ('(' .. '/') 
+  | (':' .. '<') 
+  | ('>' .. '@')
+}
+
+ident_inside_symb = { 
+    ident_symb
+    | ('='..'=')
+	| (' '..' ')
+}
+
+ident = { ident_symb+ }
+ident_inside_sq_symb= { ident_inside_symb | ('$'..'$') | ('"' .. '"')}
+ident_inside_dq_symb= { ident_inside_symb | ('$'..'$') | ('\'' .. '\'')}
+
+ident_inside_sq = {ident_inside_sq_symb+}
+
+ident_inside_dq = {
+ ( envvar
+ | ident_inside_dq_symb )+
+}
+
+envvar = { "$" ~ ident }
+envset = { name ~ "=" ~ name }
+option = { name }
+name = {
+   ident 
+ | (envvar+) 
+ | "\'" ~ ident_inside_sq ~ "\'"
+ | "\"" ~ ident_inside_dq ~ "\""
+}
