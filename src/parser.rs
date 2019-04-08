@@ -118,7 +118,7 @@ fn translate_rule_dquote(pair: pest::iterators::Pair<Rule>) -> ExtendedName {
     for inner_pair in pairs {
         let a = match inner_pair.as_rule() {
             Rule::envvar => translate_rule_envvar(inner_pair),
-            Rule::ident_inside_sq_symb => Name::Plain(inner_pair.as_str().to_string()),
+            Rule::ident_inside_dq_symb => Name::Plain(inner_pair.as_str().to_string()),
             x => {
                 panic!(
                     "Must not happen. Check grammar file. Error: {:?} {}",
