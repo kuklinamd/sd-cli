@@ -2,7 +2,17 @@ use crate::environment::Env;
 use crate::parser as prsr;
 use crate::commands as cmds;
 
-/// Translate parsed AST to commands AST using environment.
+/// Translate parsed AST to commands AST and interpolates
+/// strings using environment.
+///
+/// We have two AST in the shell: Parsed AST and Command AST.
+///
+/// Parsed AST is the one we get from parser. It may contain
+/// not interpolated strings.
+///
+/// Command AST is the one we traverse at execution stage.
+/// It contains only interpolated strings (with all necessary
+/// substitution of the environment variables).
 pub fn ast_trans(env: &Env, parsed: &prsr::Command) -> cmds::Command {
     cmds::Command {
         cmd: trans_cmd(env, &parsed.get_cmd()),
