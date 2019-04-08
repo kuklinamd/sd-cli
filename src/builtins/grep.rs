@@ -12,9 +12,15 @@ use crate::shell::ShellResult;
 use super::common::get_content;
 
 #[derive(Debug)]
+/// Modes of `grep` command.
 struct GrepMode {
+    /// Ignore case flag.
     is_ignore: bool,
+    /// 'Search as a word' flag.
     is_word: bool,
+    /// 'Append' flag.
+    /// Some(n) -- append flag is given and `n` is number of lines to append.
+    /// None -- no append flag.
     is_append: Option<u64>
 }
 
@@ -47,7 +53,7 @@ pub fn grep (args: &Vec<String>, msg: Option<String>) -> ShellResult<String> {
         match matches.opt_str("A") {
             Some(num) => {
                 if let Ok(n) = num.parse::<u64>() {
-                    Some(n)
+                    Some(n + 1)
                 } else {
                     return ShellResult::Err(ShellError::Error("Option `A` needs a number as an argument."))
                 }
@@ -121,6 +127,12 @@ mod tests {
     fn test_grep_nothing() {
         let a = grep(&vec![], None);
         assert!(a.is_err());
+    }
+
+    #[test]
+    fn test_grep_no_match() {
+        let a = grep(&vec!["x".to_string()], Some("y".to_string()));
+        assert_eq!(a, ShellResult::Ok("".to_string()));
     }
 
     #[test]
