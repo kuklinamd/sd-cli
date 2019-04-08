@@ -2,7 +2,6 @@ use std::ops::Deref;
 
 use super::shell::{Shell,ShellResult};
 use crate::error;
-use crate::error::ShellError;
 
 /// Builtin or system command.
 #[derive(PartialEq, Eq, Debug)]

@@ -1,3 +1,4 @@
+#[derive(PartialEq, Debug)]
 pub enum ShellError {
     /// Input/Output error.
     IOError(IOErr),
@@ -5,6 +6,7 @@ pub enum ShellError {
     Error(&'static str)
 }
 
+#[derive(PartialEq, Debug)]
 pub enum IOErr {
     /// Unable to write data.
     Write,

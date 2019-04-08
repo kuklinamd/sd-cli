@@ -8,6 +8,7 @@ use super::builtins::Builtins;
 use super::process;
 use super::error::ShellError;
 
+#[derive(PartialEq, Debug)]
 pub enum ShellResult<T> {
     Ok(T),
     Empty,

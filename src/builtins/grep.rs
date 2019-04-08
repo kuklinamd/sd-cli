@@ -6,10 +6,10 @@ extern crate regex;
 use getopts::Options;
 use regex::{Regex,RegexBuilder};
 
-use crate::error;
 use crate::error::{ShellError, IOErr};
 use crate::shell::ShellResult;
 use super::common::get_content;
+
 
 #[derive(Debug)]
 /// Modes of `grep` command.
