@@ -1,0 +1,75 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+namespace shell {
+class Shell {
+    local_env : Env
+    builtins : Builtins
+    init() 
+    run()
+    exec()
+}
+}
+
+namespace commands {
+class Command {
+    -cmd : CommandType
+    -next : Bind
+	+execute()
+	{static} +ast_trans()
+}
+}
+
+namespace builtins {
+class Builtin {
+    -ref : (String, String) -> Result
+    +new()
+    +exec()
+}
+class Builtins {
+    -builtins : Map<Builtin>
+	+exec()
+}
+
+Builtins *- Builtin
+}
+
+namespace environment {
+class Env {
+    -env : Map<String, String>
+    +add()
+    +get()
+}
+}
+
+namespace parser {
+class Parser {
+	+{static} parse_cmd
+}
+
+class Command {
+	-cmd : CommandType
+	-next : Bind
+	+get_cmd()
+	+get_next()
+}
+
+Parser -- Command
+}
+
+namespace process {
+class Process {
+    {static} execute_external()
+}
+
+.shell.Shell -- .builtins.Builtins
+.shell.Shell -- .environment.Env
+.shell.Shell -- .parser.Parser
+.shell.Shell -- .commands.Command
+.shell.Shell -- .process.Process
+
+.commands.Command -- .parser.Command
+.commands.Command -- .environment.Env
+}
+
+@enduml

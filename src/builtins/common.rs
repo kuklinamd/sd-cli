@@ -6,6 +6,7 @@ use crate::error::IOErr;
 
 use crate::shell::ShellResult;
 
+/// Get content of a file with given path.
 pub fn get_content(file: &String) -> ShellResult<String> {
     if let Ok(file) = File::open(&file) {
         let mut buf  = BufReader::new(file);
